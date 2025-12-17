@@ -1,0 +1,9 @@
+venv/
+.env
+app.log
+GEMINI.md
+.aider.input.history
+.aider.chat.history.md
+.venv/
+__pycache__/
+oink.env

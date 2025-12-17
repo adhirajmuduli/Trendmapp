@@ -1,0 +1,647 @@
+/* ============================================= */
+/* === Global Settings & Variables === */
+/* ============================================= */
+:root {
+    --primary-color: #0078d4;
+    --primary-hover: #005a9e;
+    --secondary-color: #ffffff;
+    --background-color: #f3f2f1;
+    --border-color: #e1dfdd;
+    --text-color: #323130;
+    --text-light: #605e5c;
+    --status-success-bg: #dff6dd;
+    --status-success-text: #107c10;
+    --status-error-bg: #fde7e9;
+    --status-error-text: #a80000;
+    --status-info-bg: #dceaf4;
+    --status-info-text: #005a9e;
+    --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    --shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+/* ============================================= */
+/* === Base & Layout === */
+/* ============================================= */
+body {
+    font-family: var(--font-family);
+    margin: 0;
+    padding: 0;
+    display: flex;
+    height: 100vh;
+    overflow: hidden;
+    background-color: var(--background-color);
+    color: var(--text-color);
+}
+
+.heatmap-tile.active {
+    background-color: #0078d4;
+    color: white;
+    font-weight: bold;
+}
+
+.button.button-small {
+    padding: 8px 14px;
+    font-size: 13px;
+    min-width: auto;
+}
+
+.heatmap-tile-scroll {
+    overflow-x: auto;
+    white-space: nowrap;
+    display: flex;
+    flex-direction: row;
+    padding: 6px 4px;
+}
+
+.container {
+    display: flex;
+    width: 100%;
+    height: 100%;
+}
+
+.control-panel {
+    width: 380px;
+    padding: 24px;
+    background-color: var(--secondary-color);
+    box-shadow: var(--shadow);
+    z-index: 1000;
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+    border-right: 1px solid var(--border-color);
+}
+
+.heatmap-tile {
+    display: inline-block;
+    margin: 4px;
+    cursor: pointer;
+    background: #b5bf7b;
+    padding: 10px 15px;
+    border: 1px solid #be9560;
+    border-radius: 6px;
+    transition: background 0.3s;
+}
+
+@media (max-width: 768px) {
+    .heatmap-tile {
+      font-size: 12px;
+      padding: 6px 10px;
+    }
+  }  
+
+#map-container {
+    display: flex;
+    flex-grow: 1;
+    position: relative;
+    height: 100vh;
+}
+
+#map {
+    width: 100%;
+    height: 100%;
+    min-height: 400px; 
+    z-index: 0;
+    background: radial-gradient(ellipse at center, #cbe8f3 0%, #b6d7e4 100%);     
+}
+
+/* ============================================= */
+/* === Header & Status === */
+/* ============================================= */
+h1 {
+    font-size: 24px;
+    color: var(--primary-color);
+    margin: 0 0 20px 0;
+    font-weight: 600;
+    padding-bottom: 15px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.status-container {
+    padding: 12px;
+    border-radius: 4px;
+    text-align: center;
+    font-size: 14px;
+    font-weight: 500;
+    min-height: 20px;
+    line-height: 1.4;
+    transition: all 0.3s ease-in-out;
+    margin-bottom: 15px;
+    display: none; /* Hidden by default, shown via JS */
+}
+
+.status-container.success {
+    background-color: var(--status-success-bg);
+    color: var(--status-success-text);
+    display: block;
+}
+
+.status-container.error {
+    background-color: var(--status-error-bg);
+    color: var(--status-error-text);
+    display: block;
+}
+
+.status-container.info {
+    background-color: var(--status-info-bg);
+    color: var(--status-info-text);
+    display: block;
+}
+
+
+/* ============================================= */
+/* === Card Layout === */
+/* ============================================= */
+.card {
+    background-color: #ffffff;
+    border-radius: 8px;
+    padding: 15px;
+    margin-bottom: 15px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    border: 1px solid var(--border-color);
+}
+
+.card h2 {
+    margin-top: 0;
+    margin-bottom: 15px;
+    font-size: 1em;
+    font-weight: 600;
+    color: var(--text-color);
+    border-bottom: 1px solid #eee;
+    padding-bottom: 10px;
+}
+
+.heatmap-tile-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 1rem;
+}
+
+.heatmap-tile:hover {
+    background: #b3e0ff;
+}
+
+/* ============================================= */
+/* === Form & UI Controls === */
+/* ============================================= */
+
+/* --- File Upload --- */
+.file-upload-area {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.file-label {
+    text-align: center;
+    border: 2px dashed var(--border-color);
+    border-radius: 4px;
+    padding: 20px;
+    width: 100%;
+    cursor: pointer;
+    transition: background-color 0.2s ease, border-color 0.2s ease;
+    margin-bottom: 10px;
+    box-sizing: border-box;
+}
+
+.file-label:hover {
+    background-color: #f9f9f9;
+    border-color: var(--primary-color);
+}
+
+#file-name {
+    font-size: 14px;
+    color: var(--text-light);
+    word-break: break-all;
+}
+
+/* --- Button Group --- */
+.button-group {
+  display: flex;
+  gap: 15px;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin: 20px 0;
+}
+
+.button-group .button,
+.button-group a.button {
+    width: auto !important;
+    max-width: 200px; /* Limit button width to prevent excessive stretching */
+    flex-grow: 0; /* Prevent flexible growth */
+    min-width: 160px;
+}
+
+.button {
+  padding: 12px 24px;
+  min-width: 200px;
+}
+
+/* --- Buttons --- */
+.button {
+    width: 100%;
+    padding: 10px 15px;
+    font-size: 14px;
+    font-weight: 600;
+    color: #fff;
+    background-color: var(--primary-color);
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.2s ease, box-shadow 0.2s ease;
+    text-align: center;
+}
+
+.button:hover:not(:disabled) {
+    background-color: var(--primary-hover);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+}
+
+.button:disabled {
+    background-color: #c8c6c4;
+    cursor: not-allowed;
+    opacity: 0.7;
+}
+
+/* --- View Toggle --- */
+.toggle-container {
+    display: flex;
+    gap: 25px;
+}
+
+.toggle-container .button {
+    flex: 1 1 45%;
+    min-width: 120px;
+    background-color: #e1e1e1;
+    color: #333;
+    border: 1px solid #ccc;
+}
+
+.toggle-container .button.active {
+    background-color: var(--primary-color);
+    color: #ffffff;
+    border-color: var(--primary-color);
+}
+
+/* --- Sliders --- */
+.slider-container {
+    margin-bottom: 15px;
+}
+
+.slider-container label {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 8px;
+    font-size: 14px;
+}
+
+.slider-container span {
+    font-weight: bold;
+    color: var(--primary-color);
+}
+
+input[type="range"] {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 100%;
+    height: 6px;
+    background: #ddd;
+    border-radius: 3px;
+    outline: none;
+}
+
+input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 18px;
+    height: 18px;
+    background: var(--primary-color);
+    cursor: pointer;
+    border-radius: 50%;
+    border: 2px solid var(--secondary-color);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+}
+
+/* --- Stats & Legend --- */
+#stats-container, #legend-container {
+    font-size: 14px;
+    color: var(--text-light);
+    min-height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #f9f9f9;
+    border-radius: 4px;
+    padding: 10px;
+}
+
+.legend-bar {
+    display: flex;
+    flex-direction: row;
+    height: 18px;
+    margin-bottom: 2px;
+    border-radius: 4px;
+    overflow: hidden;
+    width: 100%;
+}
+
+.legend-color {
+    flex: 1;
+    height: 100%;
+    min-width: 32px;
+    border-right: 1px solid #fff;
+}
+.legend-color:last-child {
+    border-right: none;
+}
+
+#legend-container {
+    font-size: 14px;
+    color: var(--text-light);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    position: relative;
+    min-height: 300px;  /* Ensure enough height */
+}
+
+.legend-colorbar {
+    width: 40px;  /* Slightly wider colorbar */
+    height: 200px;
+    margin: 10px 0;
+    position: relative;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.legend-colorbar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 3px;
+}
+
+/* Position labels with absolute positioning to prevent them from being cut off */
+.legend-labels {
+    position: absolute;
+    left: calc(50% + 25px);  /* Position to the right of the colorbar */
+    top: 0;
+    bottom: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    font-size: 12px;
+    color: var(--text-color);
+    width: 60px;  /* Fixed width for labels */
+}
+
+.legend-label {
+    position: relative;
+    padding-left: 10px;
+    line-height: 1;
+    white-space: nowrap;
+}
+
+.legend-label::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 50%;
+    width: 6px;
+    height: 1px;
+    background-color: var(--text-color);
+}
+
+/* --- Download Button --- */
+.leaflet-control-custom {
+    background: #fff !important;
+    border: 1px solid #ccc !important;
+    box-shadow: 0 1px 5px rgba(0,0,0,0.2);
+    border-radius: 4px !important;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+}
+
+.leaflet-control-custom:active {
+    background: #f0f0f0 !important;
+}
+
+/* ============================================= */
+/* === Loading Overlay === */
+/* ============================================= */
+.loading-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(255, 255, 255, 0.85);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    z-index: 2000;
+}
+
+.spinner {
+    width: 50px;
+    height: 50px;
+    border: 5px solid #e0e0e0;
+    border-radius: 50%;
+    border-top-color: var(--primary-color);
+    animation: spin 1s linear infinite;
+    margin-bottom: 15px;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* ============================================= */
+/* === Responsive Design === */
+/* ============================================= */
+
+
+@media (max-width: 768px) {
+    .container {
+        flex-direction: column;
+    }
+ 
+    .control-panel {
+        width: 100%;
+        height: auto;
+        max-height: 50vh;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        box-sizing: border-box;
+        border-right: none;
+        border-bottom: 1px solid var(--border-color);
+    }
+
+}
+
+#map-container {
+    height: 100%;
+}
+
+#map-legend {
+    position: absolute;
+    bottom: 20px;
+    width: auto;         /* let it expand */
+    height: auto;
+    right: 20px;
+    display: block;
+    z-index: 1001;
+    background-color: transparent; /* transparent so it feels like floating */
+    padding: 3px;
+    font-size: 13px;
+    text-align: center;
+    transition: opacity 0.3s ease-in-out;
+    opacity: 1;
+    border-radius: 10px;
+    backdrop-filter: blur(3px);
+}
+
+.legend-scale-vertical {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background-color: rgba(203, 232, 243, 0.4); /* matches your map background */
+    border-radius: 8px;
+    padding: 8px 12px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.15);
+    border: none;
+}
+
+.legend-gradient-vertical {
+    width: 96px;
+    max-height: 1000px;
+    height: 40vh;
+    border: 1px solid #ccc;
+    border-radius: 4px; 
+    margin: 6px 0;
+}
+
+.legend-label {
+    font-size: 12px;
+    color: #000;
+    font-weight: bold;
+}
+
+.legend-title {
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 6px;
+}
+
+.legend-hint {
+    margin-top: 6px;
+    font-size: 11px;
+    color: #333;
+}   
+
+.hidden-legend {
+    opacity: 0;
+    pointer-events: none;
+}
+
+#legend-image {
+    display: block;
+    width: 100%;
+    height: auto;       /* keeps the correct aspect ratio */
+    max-height: 40vh;   /* prevents it from growing too tall */
+    object-fit: contain; /* ensures full bar is visible */
+}
+
+.leaflet-control-attribution {
+    display: none !important;
+  }
+  
+  #map-legend .legend-title {
+    text-align: center;
+    font-weight: bold;
+    margin-bottom: 4px;
+    color: #000;
+    font-size: 12px;
+}
+
+.floating-btn {
+    position: absolute;
+    top: 10px;
+    left: 50px;
+    z-index: 1000;
+    background: #ffffff;
+    border: 1px solid #ccc;
+    padding: 8px 10px;
+    font-size: 18px;
+    border-radius: 6px;
+    cursor: pointer;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+    transition: background 0.2s ease;
+}
+
+.floating-btn:hover {
+    background: #f0f0f0;
+}
+
+/* Two-column layout: left sidebar 25%, right (map) 75% */
+.two-column-layout {
+    display: flex;
+    gap: 1rem;
+    align-items: flex-start;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+/* Left column (controls / sidebar) */
+.left-column {
+    flex: 0 0 25%;
+    max-width: 25%;
+    box-sizing: border-box;
+    overflow: auto;
+}
+
+/* Right column (map / visual) */
+.right-column {
+    flex: 1 1 75%;
+    max-width: 75%;
+    box-sizing: border-box;
+    position: relative;
+}
+
+/* Make map obey its container and not overflow */
+#map-container, #map {
+    width: 100% !important;
+    height: 75vh; /* adjust as needed (e.g. 70vh / 80vh) */
+    max-height: 90vh;
+    box-sizing: border-box;
+    position: relative; /* ensure it is contained in the right-column */
+}
+
+/* Keep interactive UI controls above the map if layered */
+.control-panel,
+.video-generator-card,
+#heatmap-gallery {
+    position: relative;
+    z-index: 10;
+}
+
+/* Ensure Leaflet controls don't push outside container */
+.leaflet-container {
+    width: 100% !important;
+    height: 100% !important;
+}
+
+/* Responsive fallback for small screens: stack columns */
+@media (max-width: 992px) {
+    .two-column-layout { flex-direction: column; }
+    .left-column, .right-column { max-width: 100%; flex: 1 1 100%; }
+    #map-container, #map { height: 60vh; }
+}
+
+
+

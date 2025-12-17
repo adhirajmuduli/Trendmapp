@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Heatmapp</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/handsontable/dist/handsontable.full.min.css">
+    <style>
+    .heatmap-tile-container {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-bottom: 1rem;
+    }
+    .heatmap-tile {
+        padding: 6px 12px;
+        background-color: #e3f2fd;
+        border: 1px solid #2196f3;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 14px;
+        transition: background 0.2s ease;
+    }
+    .heatmap-tile:hover {
+        background-color: #bbdefb;
+    }
+    </style>        
+    <script src="https://unpkg.com/leaflet-image@latest/leaflet-image.js"></script>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/handsontable/dist/handsontable.full.min.js"></script>
+   
+</head>
+<body>
+    <div class="container">
+        <div class="control-panel">
+            <h1>Heatmapp</h1>
+            <div id="status-container" class="status-container"></div>
+
+            <!-- Step 1: Data Management -->
+            <div class="card">
+                <h2>1. Manage Data</h2>
+                <p>Upload a data file or create/edit data in a table.</p>
+                <div class="file-upload-area" style="margin-bottom: 8px;">
+                    <label style="display:block; font-weight:600; margin-bottom:4px;">Boundary (GeoJSON)</label>
+                    <input type="file" id="boundary-file-input" accept=".geojson,.json" hidden>
+                    <label for="boundary-file-input" class="file-label">
+                        <span id="boundary-file-name">Click or drag boundary GeoJSON</span>
+                    </label>
+                    <div class="button-group" style="margin-top:6px;">
+                        <button id="upload-boundary-button" class="button">Upload Boundary</button>
+                    </div>
+                </div>
+                <div class="file-upload-area">
+                    <label style="display:block; font-weight:600; margin-bottom:4px;">Data (CSV/Excel)</label>
+                    <input type="file" id="file-input" accept=".csv,.xlsx,.xls" hidden>
+                    <label for="file-input" class="file-label">
+                        <span id="file-name">Click or drag file</span>
+                    </label>
+                </div>
+                <div class="button-group">
+                    <button id="upload-button" class="button" disabled>Upload & Process</button>
+                    <button id="open-data-entry" class="button">Create / Edit Table</button>
+                </div>
+            </div>
+
+            <!-- Step 2: View Controls -->
+            <div class="card">
+                <h2>2. View Controls</h2>
+                <div id="view-toggle-container" class="toggle-container">
+                    <button id="view-markers-btn" class="button active">Markers</button>
+                    <button id="view-heatmap-btn" class="button">Heatmap</button>
+                </div>
+                <div class="slider-container">
+                    <label for="method-select">Method:</label>
+                    <select id="method-select" class="button" style="width: 100%; padding: 8px;">
+                        <option value="idw" selected>IDW (Inverse Distance)</option>
+                        <option value="kde">KDE (Gaussian Kernel)</option>
+                    </select>
+                </div>
+                <div class="slider-container">
+                    <label for="bandwidth-slider">Bandwidth: <span id="bandwidth-value">2.7</span></label>
+                    <input type="range" id="bandwidth-slider" min="0.1" max="5" step="0.1" value="2.7">
+                </div>
+                <div class="slider-container">
+                    <label for="opacity-slider">Opacity: <span id="opacity-value">0.9</span></label>
+                    <input type="range" id="opacity-slider" min="0.1" max="1" step="0.01" value="0.9">
+                </div>
+                <div class="slider-container">
+                    <label for="colormap-select">Color Scheme:</label>
+                    <select id="colormap-select" class="button" style="width: 100%; padding: 8px;">
+                        <option value="turbo">Turbo</option>
+                        <option value="viridis">Viridis</option>
+                        <option value="plasma">Plasma</option>
+                        <option value="inferno">Inferno</option>
+                        <option value="magma">Magma</option>
+                        <option value="cividis">Cividis</option>
+                        <option value="jet">Jet</option>
+                        <option value="rainbow">Rainbow</option>
+                        <option value="gray">Grayscale</option>
+                    </select>
+                </div>
+                <div class="checkbox-container">
+                    <input type="checkbox" id="show-black-dots-checkbox">
+                    <label for="show-black-dots-checkbox">Show Stations</label>
+                </div>
+            </div>
+
+            <!-- Step 3: Generate Visualization -->
+            <div class="card">
+                <h2>3. Generate Visualization</h2>
+                <div class="button-group">
+                    <button id="generate-button" class="button" disabled>Generate Static Heatmap</button>
+                    <button id="toggle-video-panel" class="button button-success">Generate Animated Video</button>
+                </div>
+                <!-- Timestamp Tiles -->
+                <div class="heatmap-tile-scroll">
+                    <div style="overflow-x: auto;">
+                        <div id="heatmap-gallery" class="heatmap-tile-container"></div>
+                    </div>
+                </div>
+                <div class="button-group">
+                    <button id="nav-prev" class="button button-small">⟨ Prev</button>
+                    <button id="nav-next" class="button button-small">Next ⟩</button>
+                </div>
+            </div>
+
+            <!-- Hidden Video Generator Panel (inline) -->
+            <div id="video-generator-card" class="card" style="display:none;">
+                <h2>Animated Heatmap Video</h2>
+                <form id="video-form">
+                    <div class="slider-container">
+                        <label for="video-parameter">Parameter Name</label>
+                        <input type="text" id="video-parameter" class="button" placeholder="e.g., Chlorophyll">
+                    </div>
+                    <div class="slider-container">
+                        <label for="video-start-date">Start Date</label>
+                        <input type="date" id="video-start-date" class="button">
+                    </div>
+                    <div class="slider-container">
+                        <label for="video-end-date">End Date</label>
+                        <input type="date" id="video-end-date" class="button">
+                    </div>
+                    <div class="slider-container">
+                        <label for="video-fps">FPS</label>
+                        <input type="number" id="video-fps" class="button" min="1" max="60" value="15">
+                    </div>
+                    <div class="slider-container">
+                        <label for="video-frames">Transition Smoothness</label>
+                        <input type="number" id="video-frames" class="button" min="1" max="50" value="10">
+                    </div>
+                    <div class="button-group">
+                        <button type="submit" id="generate-video-btn" class="button button-success">Generate Video</button>
+                        <button type="button" id="play-video-btn" class="button" disabled>Play Video</button>
+                    </div>
+                </form>
+                <div id="video-status" class="status-container"></div>
+            </div>
+
+        </div>
+        <div id="map-container">
+            <div id="map"></div>
+            <div id="loading-overlay" class="loading-overlay" style="display: none;">
+                <div class="spinner"></div>
+                <p>Processing...</p>
+            </div>
+        <div id="map-legend">
+            <div class="legend-title">Legend</div>
+            <div class="legend-scale-vertical">
+              <div class="legend-label">High <span id="legend-max"></span></div>
+              <div class="legend-gradient-vertical">
+                <img id="legend-image" src="" style="width: 100%; object-fit: cover; display: block;" />
+              </div>
+              <div class="legend-label">Low <span id="legend-min"></span></div>
+            </div>
+        </div>  
+        <!-- Copy to Clipboard Button -->
+        <button id="copy-map-btn" class="floating-btn" title="Copy map to clipboard">📋</button> 
+        </div>             
+    </div>
+
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+
+</body>
+</html>
