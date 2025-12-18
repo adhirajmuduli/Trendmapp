@@ -26,6 +26,8 @@ if not DATABASE_URL:
 # ---------------------------------------------------------------------------
 from urllib.parse import urlparse, urlunparse, parse_qsl, urlencode
 
+DATABASE_URL = DATABASE_URL.strip().strip('"').strip("'")
+
 parsed = urlparse(DATABASE_URL)
 
 # 1. Switch dialect driver to asyncpg
