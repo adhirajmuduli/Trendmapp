@@ -29,7 +29,10 @@ from urllib.parse import urlparse, urlunparse, parse_qsl, urlencode
 parsed = urlparse(DATABASE_URL)
 
 # 1. Switch dialect driver to asyncpg
-scheme_async = parsed.scheme.replace("postgresql", "postgresql+asyncpg", 1)
+if parsed.scheme == "postgresql":
+    scheme_async = "postgresql+asyncpg"
+else:
+    scheme_async = parsed.scheme
 
 # 2. Remove unsupported query params (e.g. sslmode) for asyncpg
 query_items = {k: v for k, v in parse_qsl(parsed.query, keep_blank_values=True) if k.lower() not in ("sslmode", "channel_binding")}
@@ -120,3 +123,4 @@ async def init_db() -> None:
     """Create tables if they do not exist."""
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all) 
+
