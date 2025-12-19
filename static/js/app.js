@@ -20,6 +20,7 @@ class HeatmapApp {
             videoOverlay: null,
             videoBlobUrl: null,
             videoIsPlaying: false,
+            heatmapImages: {},         // timestamp -> base64 PNG (no prefix)
         };
 
         this.dom = {
@@ -377,24 +378,22 @@ class HeatmapApp {
         });
         this.dom.navPrev.addEventListener('click', () => {
             const count = this.state.timestampOrder.length;
+            if (!count) {
+                this.showStatus('Generate a heatmap to browse timestamps.', 'error');
+                return;
+            }
             this.state.currentIndex = (this.state.currentIndex - 1 + count) % count;
             this.showHeatmapAt(this.state.currentIndex);
         });
         this.dom.navNext.addEventListener('click', () => {
             const count = this.state.timestampOrder.length;
+            if (!count) {
+                this.showStatus('Generate a heatmap to browse timestamps.', 'error');
+                return;
+            }
             this.state.currentIndex = (this.state.currentIndex + 1) % count;
             this.showHeatmapAt(this.state.currentIndex);
-                 
         });
-        
-        // Colormap change listener
-        if (this.dom.colormapSelect) {
-            this.dom.colormapSelect.addEventListener('change', () => {
-                if (this.state.lastData) {
-                    this.generateHeatmap();
-                }
-            });
-        }
 
         // Event delegation for deleting measurements from map popups
         this.state.map.on('click', (e) => {
@@ -427,21 +426,29 @@ class HeatmapApp {
     }
 
     async fetchSlice() {
-        const param = this.dom.paramSelect.value;
-        const date = this.state.dates[idx];
-        if (!date) return;
-        if (!param || !date) return;
-        const url = `/api/table?param=${encodeURIComponent(param)}&date=${encodeURIComponent(date)}`;
-        const res = await fetch(url);
-        if (!res.ok) { this.showStatus('Failed to fetch slice','error'); return; }
-        const rows = await res.json();
-        if (!Array.isArray(rows) || rows.length===0){ this.showStatus('No data for selection','error'); return; }
-        // convert rows to generic format expected
-        const data = rows.map(r=>({ latitude: r.latitude, longitude: r.longitude, count: r.value??1, species: r.parameter }));
-        this.state.lastData = { data };
-        this.displayMarkers(data);
+        const ts = this.state.timestampOrder[this.state.currentIndex];
+        if (!ts) {
+            this.showStatus('No timestamp available. Generate a heatmap first.', 'error');
+            return;
+        }
+
+        let slicePoints = [];
+        if (this.state.timestampToData?.[ts]?.length) {
+            slicePoints = this.state.timestampToData[ts];
+        } else if (Array.isArray(this.state.lastData?.data)) {
+            slicePoints = this.state.lastData.data.filter(
+                (point) => String(point.timestamp) === String(ts)
+            );
+        }
+
+        if (!slicePoints.length) {
+            this.showStatus('No data for the selected timestamp.', 'error');
+            return;
+        }
+
+        this.displayMarkers({ data: slicePoints });
         this.dom.generateButton.disabled = false;
-        this.showStatus(`${data.length} points for ${param} @ ${date}`,'success');
+        this.showStatus(`${slicePoints.length} points @ ${ts}`, 'success');
     }
 
     loadTableData() {
@@ -725,6 +732,7 @@ class HeatmapApp {
             this.state.globalMax = result.global_max;
 
             this.state.heatmapLayers = {};
+            this.state.heatmapImages = images;
             this.state.timestampOrder = Object.keys(images);
             this.state.currentIndex = 0;
             this.dom.tileContainer.innerHTML = '';
@@ -1052,61 +1060,14 @@ class HeatmapApp {
             }
         }
 
-        this.showStatus('Preparing map snapshot...', 'info');
-
-        // Set a white background on the map container itself for the snapshot
-        const mapContainer = this.dom.mapContainer;
-        // Temporarily override map background for snapshot
-        const originalBg = mapContainer.style.backgroundColor;
-        mapContainer.style.backgroundColor = '#ffffff';
-
-        if (typeof leafletImage !== 'function') {
-            console.error('leafletImage is not loaded or not a function');
-            this.showStatus('Snapshot library not available. Try reloading.', 'error');
+        const ts = this.state.timestampOrder[this.state.currentIndex];
+        const base64 = ts && this.state.heatmapImages?.[ts];
+        if (base64) {
+            this.downloadHeatmapImage(base64, ts);
             return;
-        }        
+        }
 
-        // The 'idle' event ensures all tiles and overlays are loaded.
-        this.state.map.once('idle', () => {
-            setTimeout(() => {
-                leafletImage(this.state.map, (err, canvas) => {
-                    mapContainer.style.backgroundColor = '';
-        
-                    if (err) {
-                        console.error('Snapshot failed during rendering:', err);
-                        this.showStatus('Could not create map snapshot. Please try again.', 'error');
-                        return;
-                    }
-        
-                    if (canvas.width === 0 || canvas.height === 0) {
-                        this.showStatus('Snapshot failed: the created image was blank.', 'error');
-                        return;
-                    }
-        
-                    try {
-                        const link = document.createElement('a');
-                        link.download = 'chilika_map_snapshot.png';
-                        link.href = canvas.toDataURL('image/png');
-                        document.body.appendChild(link);
-                        link.click();
-                        document.body.removeChild(link);
-                        this.showStatus('Snapshot downloaded successfully!', 'success');
-                    } catch (e) {
-                        console.error('Failed to save the snapshot:', e);
-                        this.showStatus('Could not save the snapshot image.', 'error');
-                    }
-                });
-            }, 100); // delay to allow heatmap image overlays to render
-        });        
-
-        // Trigger a re-render to ensure the 'idle' event will fire.
-        this.state.map.invalidateSize();
-    }
-
-    showStatus(message, type = 'info') {
-        this.dom.statusContainer.textContent = message;
-        this.dom.statusContainer.className = 'status-container'; // Reset classes
-        this.dom.statusContainer.classList.add(type);
+        this.downloadLeafletSnapshot();
     }
 
     showLoading(isLoading, message = 'Loading...') {

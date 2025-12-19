@@ -2,7 +2,7 @@
 
 import pandas as pd
 from datetime import datetime
-from generate_video import generate_animation_video
+from utils.video_generator import generate_animation_video
 from db import AsyncSessionLocal, Station, Parameter, Measurement
 from sqlalchemy import select, and_
 
