@@ -137,6 +137,8 @@ Bookmarking visualizations with the gallery and then downloading it, one can sav
 
 External dependencies include Quart, SQLAlchemy async stack, pandas, numpy, scipy, scikit-learn, shapely, geopandas, imageio, matplotlib, and Leaflet/OpenCV on the frontend/backend respectively (`requirements.txt`).
 
+```
+
 ## License
 
 This project is distributed under the MIT License (see [LICENSE](./LICENSE)).
@@ -144,8 +146,6 @@ This project is distributed under the MIT License (see [LICENSE](./LICENSE)).
 ## Citation
 
 If you use Trendsmapp in academic work, please cite it as:
-
-```
 
 ```
 
