@@ -32,37 +32,31 @@ But it is not limited to that. Although the default map is that of Chilika lagoo
 
 ## Installation
 
+**If you just want the results**; don't bother with all the technalities below, just visit the [hosted_site](https://huggingface.co/spaces/Takerupandclose/Trendsmapp), and test your data by following the procedures mentioned under `Usage` section.
+
+
+**If you want to run locally:**
+
+1. **Clone and set up Python environment**
+```bash
+git clone https://github.com/adhirajmuduli/Trendmapp.git
+cd Trendmapp
+python -m venv .venv
+.venv\Scripts\activate  # Windows
+pip install -r requirements.txt
 ```
-
-If you just want the results, don't bother with all the technalities below, just visit the [hosted_site](https://huggingface.co/spaces/Takerupandclose/Trendsmapp), and test your data by following the procedures mentioned under `Usage` section.
-
+2. **Configure environment variables (Option B).** Create a `.env` (or reuse `oink.env`) containing at minimum:
 ```
-
+DATABASE_URL=postgresql+asyncpg://<user>:<password>@<host>/<db>?sslmode=require
 ```
-
-If you want to run locally:
-
-    1. **Clone and set up Python environment**
-    ```bash
-    git clone https://github.com/adhirajmuduli/Trendmapp.git
-    cd Trendmapp
-    python -m venv .venv
-    .venv\Scripts\activate  # Windows
-    pip install -r requirements.txt
-    ```
-    2. **Configure environment variables (Option B).** Create a `.env` (or reuse `oink.env`) containing at minimum:
-    ```
-    DATABASE_URL=postgresql+asyncpg://<user>:<password>@<host>/<db>?sslmode=require
-    ```
-    For the managed NeonDB instance, paste the provided connection string exactly as issued by Neon (e.g., `postgresql+asyncpg://neondb_owner:...@.../neondb?sslmode=require`). Do **not** hardcode secrets in the codebase; keep them in your environment file.
-    3. **Install geospatial system deps.** On Debian/Ubuntu use `sudo apt-get install gdal-bin libproj-dev`. On Windows, install GDAL wheels compatible with your Python version (see [https://www.lfd.uci.edu/~gohlke/pythonlibs/](https://www.lfd.uci.edu/~gohlke/pythonlibs/)).
-    4. **Run the server**
-    ```bash
-    hypercorn app:app --bind 0.0.0.0:7860 --reload
-    ```
-    or `python app.py` for Quart’s dev server.
-
+For the managed NeonDB instance, paste the provided connection string exactly as issued by Neon (e.g., `postgresql+asyncpg://neondb_owner:...@.../neondb?sslmode=require`). Do **not** hardcode secrets in the codebase; keep them in your environment file.
+3. **Install geospatial system deps.** On Debian/Ubuntu use `sudo apt-get install gdal-bin libproj-dev`. On Windows, install GDAL wheels compatible with your Python version (see [https://www.lfd.uci.edu/~gohlke/pythonlibs/](https://www.lfd.uci.edu/~gohlke/pythonlibs/)).
+4. **Run the server**
+```bash
+hypercorn app:app --bind 0.0.0.0:7860 --reload
 ```
+or `python app.py` for Quart’s dev server.
+
 
 ## Usage (with Example Data)
 
