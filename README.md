@@ -32,6 +32,22 @@ But it is not limited to that. Although the default map is that of Chilika lagoo
 
 ## Installation
 
+```
+
+If you just want the results, don't bother with all the technalities below, just visit the site mentioned below and test your data by following the procedures mentioned under ``Usage`` section.
+
+```
+
+[text](https://huggingface.co/spaces/Takerupandclose/Trendsmapp)
+
+```
+
+```
+
+```
+
+If you want to run locally:
+
 1. **Clone and set up Python environment**
    ```bash
    git clone https://github.com/adhirajmuduli/Trendmapp.git
@@ -51,6 +67,8 @@ But it is not limited to that. Although the default map is that of Chilika lagoo
    hypercorn app:app --bind 0.0.0.0:7860 --reload
    ```
    or `python app.py` for Quart’s dev server.
+
+```
 
 ## Usage (with Example Data)
 
@@ -83,10 +101,12 @@ The uploader renames the first two columns to latitude/longitude and melts each 
 
 ## Example Workflow
 
-1. **Data ingestion.** Field team exports an Excel workbook of nutrient concentrations; scientists verify headers match the latitude/longitude/timestamps convention.
-2. **Upload + QA.** The upload endpoint validates ranges, reports counts, and stores the cleaned dataset plus global extrema in the server session for reuse.
-3. **Boundary management.** Analysts upload a study-area GeoJSON (or rely on `static/data/export.geojson`) and fit the Leaflet map to its bounds.
-4. **Heatmap iteration.** Researchers try multiple interpolation methods/colormaps, bookmarking visualizations with the gallery, downloads, and clipboard copy.
+1. **Data ingestion.** Field team exports an Excel workbook (`.xlsx` file) of say a parameter -- nutrient concentrations; scientists verify headers match the latitude/longitude/timestamps convention. (See the `testfile.xlsx` provided in the repo for clarity - it was also the test-data used.)
+2. **Upload + QA.** The upload endpoint validates ranges, reports counts, and stores the cleaned dataset plus global minima and maxima in the server session for reuse (generating the legened, as well as heatmap color assignment).
+3. **Boundary management.** Analysts upload a study-area GeoJSON (or rely on `static/data/export.geojson`) and fit the Leaflet map to its bounds. These files define the area over which the heatmap mask is to be clipped. 
+One can search for their area and obtain their geojson via ***openstreetmap*** or other related databases for larger files.
+4. **Heatmap iteration.** Researchers can try multiple interpolation methods (IDW/KDE), coloring schemas (turbo, inferno, etc.), bandwith and opacity as they see fit according to their density of data. For denser data distribution, it is recommended to use lower bandwidth and color schemes with lesser variation over the gradient.
+Bookmarking visualizations with the gallery and then downloading it, one can save their results.
 5. **Temporal storytelling.** `/api/animate` interpolates intermediate frames, producing MP4s that summarize eutrophication trends over the sampled months.
 6. **Data stewardship.** Via `/api/table`, teams correct outliers or add late measurements through the AG Grid UI, backed by PostgreSQL for multi-user persistence.
 
@@ -131,10 +151,14 @@ This project is distributed under the MIT License (see [LICENSE](./LICENSE)).
 If you use Trendsmapp in academic work, please cite it as:
 
 ```
+
 ```
 
 Muduli A., Muduli PK. (2025). Trendsmapp: Spatiotemporal heatmaps for lagoon monitoring (Version 1.0) [Computer software]. https://github.com/adhirajmuduli/Trendmapp
 
 ```
 
-For JOSS submissions, include the DOI once issued.
+For JOSS citations, DOI will be updated herein once issued.
+
+## NOTE
+
