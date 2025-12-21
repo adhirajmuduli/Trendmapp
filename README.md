@@ -34,13 +34,7 @@ But it is not limited to that. Although the default map is that of Chilika lagoo
 
 ```
 
-If you just want the results, don't bother with all the technalities below, just visit the site mentioned below and test your data by following the procedures mentioned under ``Usage`` section.
-
-```
-
-[text](https://huggingface.co/spaces/Takerupandclose/Trendsmapp)
-
-```
+If you just want the results, don't bother with all the technalities below, just visit the [hosted_site](https://huggingface.co/spaces/Takerupandclose/Trendsmapp), and test your data by following the procedures mentioned under `Usage` section.
 
 ```
 
