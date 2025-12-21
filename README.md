@@ -24,10 +24,15 @@ But it is not limited to that. Although the default map is that of Chilika lagoo
 ## Implemented Features
 
 1. **File ingestion and validation.** Upload CSV/Excel files, auto-detect latitude/longitude columns, melt wide timestamp tables into long form, and run schema/value checks before visualization (@app.py#152-310).
+
 2. **Heatmap generation.** Generate masked PNG heatmaps per timestamp using IDW or KDE within a supplied GeoJSON boundary, store them as base64 tiles, and manage layer navigation/downloads on the client (@app.py#340-566, @static/js/app.js#667-1177).
+
 3. **Interactive map UI.** Leaflet front-end toggles between markers (these represent dots of relative sizes, corresponding to the co-ordinate the data is provided) and heatmaps, adjusts opacity /bandwidth (typically, the radius upto which interpolation is to be done. Higher the density of data, the lower the bandwidth is to be selected), shows station markers (dots showing the input co-ordinates), and supports copy-to-clipboard / white-background downloads (@static/js/app.js).
+
 4. **Video synthesis.** `/api/animate` plus `utils/animation_generator.py` build smooth MP4 animations via radial basis spatial interpolation and cubic temporal interpolation clipped to the lagoon mask.
+
 5. **Data entry and persistence.** Async SQLAlchemy models with CRUD APIs (`routes/data_api.py`) power the spreadsheet UI, enabling collaborative edits that persist to PostgreSQL.
+
 6. **Legend + boundary tooling.** Server-side legend endpoint and boundary uploader keep rendered products consistent throughout the session.
 
 ## Installation
