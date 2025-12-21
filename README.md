@@ -126,11 +126,12 @@ External dependencies include Quart, SQLAlchemy async stack, pandas, numpy, scip
 
 This project is distributed under the MIT License (see [LICENSE](./LICENSE)).
 
-```
-```
 ## Citation
 
 If you use Trendsmapp in academic work, please cite it as:
+
+```
+```
 
 Muduli A., Muduli PK. (2025). Trendsmapp: Spatiotemporal heatmaps for lagoon monitoring (Version 1.0) [Computer software]. https://github.com/adhirajmuduli/Trendmapp
 
