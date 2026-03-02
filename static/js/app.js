@@ -39,6 +39,7 @@ class HeatmapApp {
             viewHeatmapBtn: document.getElementById('view-heatmap-btn'),
             dataEntryContainer: document.getElementById('data-entry-container'),
             loadDataButton: document.getElementById('load-data-button'),
+            openDataEntryBtn: document.getElementById('open-data-entry'),
             paramSelect: document.getElementById('param-select'),
             showBlackDotsCheckbox: document.getElementById('show-black-dots-checkbox'),
             navPrev: document.getElementById('nav-prev'),
@@ -307,9 +308,11 @@ class HeatmapApp {
         this.dom.viewMarkersBtn.addEventListener('click', () => this.setViewMode('markers'));
         this.dom.viewHeatmapBtn.addEventListener('click', () => this.setViewMode('heatmap'));
         // Do NOT auto-generate on method/colormap change; wait for button click
-        this.dom.openDataEntryBtn.addEventListener('click', () => {
-            window.open('/data-entry', '_blank');
-        });
+        if (this.dom.openDataEntryBtn) {
+            this.dom.openDataEntryBtn.addEventListener('click', () => {
+                window.open('/data-entry', '_blank');
+            });
+        }
 
         // Boundary upload handlers
         if (this.dom.boundaryFileInput) {
